@@ -1,5 +1,5 @@
 //
-//  Animus2InstructionGrab.swift
+//  AnimusInstructionGrab.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/7/24.
@@ -7,12 +7,12 @@
 
 import Foundation
 
-class Animus2InstructionGrab {
+class AnimusInstructionGrab {
     
     // No knowledge of meme bag.
     // It operates on a command, and the list of active touches...
-    let pointerBag = Animus2TouchPointerBag(format: .grab)
-    let memeBag = Animus2TouchMemeBag(format: .grab)
+    let pointerBag = AnimusTouchPointerBag(format: .grab)
+    let memeBag = AnimusTouchMemeBag(format: .grab)
     
     init() {
         
@@ -20,7 +20,7 @@ class Animus2InstructionGrab {
     
     @MainActor func performMemeCommands(jiggle: Jiggle,
                              jiggleDocument: JiggleDocument,
-                             controller: Animus2Controller) {
+                             controller: AnimusController) {
         
         // we do them in order..
         for commandIndex in 0..<memeBag.memeCommandCount {
@@ -52,15 +52,15 @@ class Animus2InstructionGrab {
     
     @MainActor func captureStart(jiggle: Jiggle,
                                  jiggleDocument: JiggleDocument,
-                                 controller: Animus2Controller,
-                                 command: Animus2TouchMemeCommand) {
+                                 controller: AnimusController,
+                                 command: AnimusTouchMemeCommand) {
         _ = pointerBag.captureStart(jiggle: jiggle)
     }
     
     @MainActor func captureTrack(jiggle: Jiggle,
                                  jiggleDocument: JiggleDocument,
-                                 controller: Animus2Controller,
-                                 command: Animus2TouchMemeCommand) {
+                                 controller: AnimusController,
+                                 command: AnimusTouchMemeCommand) {
         _ = pointerBag.captureTrack(jiggle: jiggle,
                                     jiggleDocument: jiggleDocument)
     }

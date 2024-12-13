@@ -1,5 +1,5 @@
 //
-//  Animus2Controller+Flush.swift
+//  AnimusController+Flush.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/11/24.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-extension Animus2Controller {
+extension AnimusController {
     
     //
     // [Touch Routes Verify] 12-10-2024
@@ -23,8 +23,7 @@ extension Animus2Controller {
         flushPurgatoryAnimusTouches_All(jiggleViewModel: jiggleViewModel,
                                         jiggleDocument: jiggleDocument)
         flushAnimusTouches_All(jiggleViewModel: jiggleViewModel,
-                               jiggleDocument: jiggleDocument,
-                               reason: .appBackground)
+                               jiggleDocument: jiggleDocument)
         snapshot_post(jiggleViewModel: jiggleViewModel,
                       jiggleDocument: jiggleDocument,
                       animationMode: animationMode)
@@ -77,8 +76,7 @@ extension Animus2Controller {
     // 3.) snapshot_post(...)
     //
     @MainActor func flushAnimusTouches_All(jiggleViewModel: JiggleViewModel,
-                                           jiggleDocument: JiggleDocument,
-                                           reason: Animus2TouchRemoveReason) {
+                                           jiggleDocument: JiggleDocument) {
         
         tempAnimusTouchCount = 0
         for animusTouchIndex in 0..<animusTouchCount {
@@ -90,8 +88,7 @@ extension Animus2Controller {
             let animusTouch = tempAnimusTouches[animusTouchIndex]
             _ = removeAnimusTouch(jiggleViewModel: jiggleViewModel,
                                   jiggleDocument: jiggleDocument,
-                                  animusTouch: animusTouch,
-                                  reason: reason)
+                                  animusTouch: animusTouch)
         }
     }
     
@@ -139,8 +136,7 @@ extension Animus2Controller {
             let animusTouch = tempAnimusTouches[animusTouchIndex]
             _ = removeAnimusTouch(jiggleViewModel: jiggleViewModel,
                                   jiggleDocument: jiggleDocument,
-                                  animusTouch: animusTouch,
-                                  reason: .expired)
+                                  animusTouch: animusTouch)
         }
     }
     
@@ -196,8 +192,7 @@ extension Animus2Controller {
             let animusTouch = tempAnimusTouches[animusTouchIndex]
             _ = removeAnimusTouch(jiggleViewModel: jiggleViewModel,
                                   jiggleDocument: jiggleDocument,
-                                  animusTouch: animusTouch,
-                                  reason: .touchMismatch)
+                                  animusTouch: animusTouch)
         }
     }
     
@@ -256,8 +251,7 @@ extension Animus2Controller {
             let animusTouch = tempAnimusTouches[animusTouchIndex]
             _ = removeAnimusTouch(jiggleViewModel: jiggleViewModel,
                                   jiggleDocument: jiggleDocument,
-                                  animusTouch: animusTouch,
-                                  reason: .modeMismatch)
+                                  animusTouch: animusTouch)
         }
     }
     
@@ -321,8 +315,7 @@ extension Animus2Controller {
             let animusTouch = tempAnimusTouches[animusTouchIndex]
             _ = removeAnimusTouch(jiggleViewModel: jiggleViewModel,
                                   jiggleDocument: jiggleDocument,
-                                  animusTouch: animusTouch,
-                                  reason: .orphaned)
+                                  animusTouch: animusTouch)
         }
     }
     

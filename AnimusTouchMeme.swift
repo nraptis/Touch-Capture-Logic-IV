@@ -1,5 +1,5 @@
 //
-//  Animus2TouchSkeleton.swift
+//  AnimusTouchSkeleton.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/8/24.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class Animus2TouchMeme {
+class AnimusTouchMeme {
     
     init(x: Float,
          y: Float,
@@ -20,11 +20,4 @@ class Animus2TouchMeme {
     var x: Float
     var y: Float
     var touchID: ObjectIdentifier
-    
-    // The residency should not change. It will simply appear in the list...
-    //var residency: AnimusTouchResidency
-    
-    // The meme would not be expired, it would simply be gone...
-    //var isExpired: Bool
-    
 }

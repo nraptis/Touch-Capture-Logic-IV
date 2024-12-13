@@ -1,5 +1,5 @@
 //
-//  Animus2TouchPointerBag+Position.swift
+//  AnimusTouchPointerBag+Position.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/11/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Animus2TouchPointerBag {
+extension AnimusTouchPointerBag {
     
     
     func captureStart_Position(jiggle: Jiggle,
@@ -66,13 +66,12 @@ extension Animus2TouchPointerBag {
         var cursorDirX = proposedX
         var cursorDirY = proposedY
         let cursorLengthSquared = cursorDirX * cursorDirX + cursorDirY * cursorDirY
-        let cursorLength: Float
         if cursorLengthSquared > Math.epsilon {
-            let _cursorLength = sqrtf(cursorLengthSquared)
+            let cursorLength = sqrtf(cursorLengthSquared)
             let baseDistance_R1 = Jiggle.getAnimationCursorFalloffDistance_R1(format: format,
                                                                               measuredSize: jiggle.measuredSize,
                                                                               userGrabDragPower: jiggle.grabDragPower)
-            if (captureStartCursorFalloffDistance_R1 > baseDistance_R1) && (_cursorLength < captureStartCursorFalloffDistance_R1) {
+            if (captureStartCursorFalloffDistance_R1 > baseDistance_R1) && (cursorLength < captureStartCursorFalloffDistance_R1) {
                 jiggle.animationCursorX = proposedX
                 jiggle.animationCursorY = proposedY
                 captureStart_Position(jiggle: jiggle,
@@ -80,20 +79,17 @@ extension Animus2TouchPointerBag {
                                       cursorY: proposedY,
                                       averageX: averageX,
                                       averageY: averageY)
-                cursorLength = _cursorLength
             } else {
-                cursorDirX /= _cursorLength
-                cursorDirY /= _cursorLength
-                let fixedDistance = Math.fallOffOvershoot(input: _cursorLength,
+                cursorDirX /= cursorLength
+                cursorDirY /= cursorLength
+                let fixedDistance = Math.fallOffOvershoot(input: cursorLength,
                                                           falloffStart: captureStartCursorFalloffDistance_R1,
                                                           resultMax: captureStartCursorFalloffDistance_R2,
                                                           inputMax: captureStartCursorFalloffDistance_R3)
                 jiggle.animationCursorX = cursorDirX * fixedDistance
                 jiggle.animationCursorY = cursorDirY * fixedDistance
-                cursorLength = fixedDistance
             }
         } else {
-            cursorLength = 0.0
             jiggle.animationCursorX = 0.0
             jiggle.animationCursorY = 0.0
         }
@@ -102,31 +98,46 @@ extension Animus2TouchPointerBag {
         case .grab:
             break
         case .continuous:
-            let measurePercentLinear = Jiggle.getMeasurePercentLinear(measuredSize: jiggle.measuredSize)
-            let distanceR2 = Jiggle.getAnimationCursorFalloffDistance_R2(measurePercentLinear: measurePercentLinear)
-            let angle: Float
-            if cursorLength > Math.epsilon {
-                angle = -atan2f(-jiggle.animationCursorX, -jiggle.animationCursorY)
-            } else {
-                angle = 0.0
-            }
-            var fixedAngle = fmodf(angle, Math.pi2)
-            if fixedAngle < 0.0 {
-                fixedAngle += Math.pi2
-            }
-            var anglePercent = fixedAngle / Math.pi2
-            if anglePercent < 0.0 { anglePercent = 0.0 }
-            if anglePercent > 1.0 { anglePercent = 1.0 }
-            var powerPercent = cursorLength / distanceR2
-            if powerPercent < 0.0 { powerPercent = 0.0 }
-            if powerPercent > 1.0 { powerPercent = 1.0 }
-            let angleMin = Animus2InstructionContinuous.userContinuousAngleMin
-            let angleMax = Animus2InstructionContinuous.userContinuousAngleMax
-            let powerMin = Animus2InstructionContinuous.userContinuousPowerMin
-            let powerMax = Animus2InstructionContinuous.userContinuousPowerMax
-            jiggle.continuousAngle = angleMin + (angleMax - angleMin) * anglePercent
-            jiggle.continuousPower = powerMin + (powerMax - powerMin) * powerPercent
-            jiggleDocument.animationContinuousDraggingPublisher.send(())
+            registerContinuousStartPosition(jiggle: jiggle,
+                                            jiggleDocument: jiggleDocument)
         }
+    }
+    
+    @MainActor func registerContinuousStartPosition(jiggle: Jiggle,
+                                                    jiggleDocument: JiggleDocument) {
+        let cursorDirX = jiggle.animationCursorX
+        let cursorDirY = jiggle.animationCursorY
+        let cursorLengthSquared = cursorDirX * cursorDirX + cursorDirY * cursorDirY
+        let cursorLength: Float
+        if cursorLengthSquared > Math.epsilon {
+            cursorLength = sqrtf(cursorLengthSquared)
+        } else {
+            cursorLength = 0.0
+        }
+        let measurePercentLinear = Jiggle.getMeasurePercentLinear(measuredSize: jiggle.measuredSize)
+        let distanceR2 = Jiggle.getAnimationCursorFalloffDistance_R2(measurePercentLinear: measurePercentLinear)
+        let angle: Float
+        if cursorLength > Math.epsilon {
+            angle = -atan2f(-jiggle.animationCursorX, -jiggle.animationCursorY)
+        } else {
+            angle = 0.0
+        }
+        var fixedAngle = fmodf(angle, Math.pi2)
+        if fixedAngle < 0.0 {
+            fixedAngle += Math.pi2
+        }
+        var anglePercent = fixedAngle / Math.pi2
+        if anglePercent < 0.0 { anglePercent = 0.0 }
+        if anglePercent > 1.0 { anglePercent = 1.0 }
+        var powerPercent = cursorLength / distanceR2
+        if powerPercent < 0.0 { powerPercent = 0.0 }
+        if powerPercent > 1.0 { powerPercent = 1.0 }
+        let angleMin = AnimusInstructionContinuous.userContinuousAngleMin
+        let angleMax = AnimusInstructionContinuous.userContinuousAngleMax
+        let powerMin = AnimusInstructionContinuous.userContinuousPowerMin
+        let powerMax = AnimusInstructionContinuous.userContinuousPowerMax
+        jiggle.continuousAngle = angleMin + (angleMax - angleMin) * anglePercent
+        jiggle.continuousPower = powerMin + (powerMax - powerMin) * powerPercent
+        jiggleDocument.animationContinuousDraggingPublisher.send(())
     }
 }

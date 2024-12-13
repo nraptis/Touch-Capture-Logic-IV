@@ -1,5 +1,5 @@
 //
-//  Animus2TouchMemeBag.swift
+//  AnimusTouchMemeBag.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/8/24.
@@ -7,20 +7,20 @@
 
 import Foundation
 
-class Animus2TouchMemeBag {
+class AnimusTouchMemeBag {
     
     let format: AnimusTouchFormat
     init(format: AnimusTouchFormat) {
         self.format = format
     }
     
-    var beforeMemes = [Animus2TouchMeme]()
+    var beforeMemes = [AnimusTouchMeme]()
     var beforeMemeCount = 0
     
-    var afterMemes = [Animus2TouchMeme]()
+    var afterMemes = [AnimusTouchMeme]()
     var afterMemeCount = 0
     
-    var memeCommands = [Animus2TouchMemeCommand]()
+    var memeCommands = [AnimusTouchMemeCommand]()
     var memeCommandCount = 0
     
     
@@ -28,13 +28,13 @@ class Animus2TouchMemeBag {
         
         for memeIndex in 0..<beforeMemeCount {
             let meme = beforeMemes[memeIndex]
-            Animus2PartsFactory.shared.depositAnimusTouchMeme(meme)
+            AnimusPartsFactory.shared.depositAnimusTouchMeme(meme)
         }
         beforeMemeCount = 0
         
         for memeIndex in 0..<beforeMemeCount {
             let meme = beforeMemes[memeIndex]
-            Animus2PartsFactory.shared.depositAnimusTouchMeme(meme)
+            AnimusPartsFactory.shared.depositAnimusTouchMeme(meme)
         }
         beforeMemeCount = 0
     }
@@ -44,7 +44,7 @@ class Animus2TouchMemeBag {
         
         for commandIndex in 0..<memeCommandCount {
             let command = memeCommands[commandIndex]
-            Animus2PartsFactory.shared.depositAnimusTouchMemeCommand(command)
+            AnimusPartsFactory.shared.depositAnimusTouchMemeCommand(command)
         }
         memeCommandCount = 0
         
@@ -61,7 +61,7 @@ class Animus2TouchMemeBag {
             }
         }
         if isRemoveCommandNeeded {
-            let newCommand = Animus2PartsFactory.shared.withdrawAnimusTouchMemeCommand()
+            let newCommand = AnimusPartsFactory.shared.withdrawAnimusTouchMemeCommand()
             newCommand.chunkCount = 0
             newCommand.type = .remove
             addMemeCommand(memeCommand: newCommand)
@@ -69,7 +69,7 @@ class Animus2TouchMemeBag {
             for beforeMemeIndex in 0..<beforeMemeCount {
                 let beforeMeme = beforeMemes[beforeMemeIndex]
                 if afterMemesContains(touchID: beforeMeme.touchID) == false {
-                    let chunk = Animus2TouchMemeCommandChunk.remove(beforeMeme.touchID)
+                    let chunk = AnimusTouchMemeCommandChunk.remove(beforeMeme.touchID)
                     newCommand.addChunk(chunk: chunk)
                 }
             }
@@ -99,7 +99,7 @@ class Animus2TouchMemeBag {
             
             var afterX = Float(0.0)
             var afterY = Float(0.0)
-            let newCommand = Animus2PartsFactory.shared.withdrawAnimusTouchMemeCommand()
+            let newCommand = AnimusPartsFactory.shared.withdrawAnimusTouchMemeCommand()
             newCommand.chunkCount = 0
             newCommand.type = .move
             addMemeCommand(memeCommand: newCommand)
@@ -120,7 +120,7 @@ class Animus2TouchMemeBag {
                 }
                 if isMoved {
                     
-                    let chunk = Animus2TouchMemeCommandChunk.move(beforeMeme.touchID,
+                    let chunk = AnimusTouchMemeCommandChunk.move(beforeMeme.touchID,
                                                                   beforeMeme.x,
                                                                   beforeMeme.y,
                                                                   afterX,
@@ -140,7 +140,7 @@ class Animus2TouchMemeBag {
         }
         
         if isAddCommandNeeded {
-            let newCommand = Animus2PartsFactory.shared.withdrawAnimusTouchMemeCommand()
+            let newCommand = AnimusPartsFactory.shared.withdrawAnimusTouchMemeCommand()
             newCommand.chunkCount = 0
             newCommand.type = .add
             addMemeCommand(memeCommand: newCommand)
@@ -148,7 +148,7 @@ class Animus2TouchMemeBag {
             for afterMemeIndex in 0..<afterMemeCount {
                 let afterMeme = afterMemes[afterMemeIndex]
                 if !beforeMemesContains(touchID: afterMeme.touchID) {
-                    let chunk = Animus2TouchMemeCommandChunk.add(afterMeme.touchID,
+                    let chunk = AnimusTouchMemeCommandChunk.add(afterMeme.touchID,
                                                                  afterMeme.x,
                                                                  afterMeme.y)
                     newCommand.addChunk(chunk: chunk)
@@ -188,12 +188,12 @@ class Animus2TouchMemeBag {
         }
     }
     
-    func snapshotBefore(jiggle: Jiggle, controller: Animus2Controller) {
+    func snapshotBefore(jiggle: Jiggle, controller: AnimusController) {
         
         // Purge the old list
         for memeIndex in 0..<beforeMemeCount {
             let meme = beforeMemes[memeIndex]
-            Animus2PartsFactory.shared.depositAnimusTouchMeme(meme)
+            AnimusPartsFactory.shared.depositAnimusTouchMeme(meme)
         }
         beforeMemeCount = 0
         
@@ -211,14 +211,14 @@ class Animus2TouchMemeBag {
                         break
                     case .continuous:
                         
-                        if Animus2Controller.INSANE_VERIFY {
+                        if AnimusController.INSANE_VERIFY {
                             if animusTouch.touchID == nil {
                                 print("FATAL: We're doing \"snapshotBefore\" and have null touch ID... (Continuous)")
                             }
                         }
                         
                         if let touchID = animusTouch.touchID {
-                            let newMeme = Animus2PartsFactory.shared.withdrawAnimusTouchMeme(touchID: touchID,
+                            let newMeme = AnimusPartsFactory.shared.withdrawAnimusTouchMeme(touchID: touchID,
                                                                                              x: animusTouch.x,
                                                                                              y: animusTouch.y)
                             beforeMemesAdd(newMeme)
@@ -231,14 +231,14 @@ class Animus2TouchMemeBag {
                     switch format {
                     case .grab:
                         
-                        if Animus2Controller.INSANE_VERIFY {
+                        if AnimusController.INSANE_VERIFY {
                             if animusTouch.touchID == nil {
                                 print("FATAL: We're doing \"snapshotBefore\" and have null touch ID... (Grab)")
                             }
                         }
                         
                         if let touchID = animusTouch.touchID {
-                            let newMeme = Animus2PartsFactory.shared.withdrawAnimusTouchMeme(touchID: touchID,
+                            let newMeme = AnimusPartsFactory.shared.withdrawAnimusTouchMeme(touchID: touchID,
                                                                                              x: animusTouch.x,
                                                                                              y: animusTouch.y)
                             while beforeMemes.count <= beforeMemeCount {
@@ -259,12 +259,12 @@ class Animus2TouchMemeBag {
     
     
     
-    func snapshotAfter(jiggle: Jiggle, controller: Animus2Controller) {
+    func snapshotAfter(jiggle: Jiggle, controller: AnimusController) {
         
         // Purge the old list
         for memeIndex in 0..<afterMemeCount {
             let meme = afterMemes[memeIndex]
-            Animus2PartsFactory.shared.depositAnimusTouchMeme(meme)
+            AnimusPartsFactory.shared.depositAnimusTouchMeme(meme)
         }
         afterMemeCount = 0
         
@@ -288,14 +288,14 @@ class Animus2TouchMemeBag {
                         break
                     case .continuous:
                         
-                        if Animus2Controller.INSANE_VERIFY {
+                        if AnimusController.INSANE_VERIFY {
                             if animusTouch.touchID == nil {
                                 print("FATAL: We're doing \"snapshotAfter\" and have null touch ID... (Continuous)")
                             }
                         }
                         
                         if let touchID = animusTouch.touchID {
-                            let newMeme = Animus2PartsFactory.shared.withdrawAnimusTouchMeme(touchID: touchID,
+                            let newMeme = AnimusPartsFactory.shared.withdrawAnimusTouchMeme(touchID: touchID,
                                                                                              x: animusTouch.x,
                                                                                              y: animusTouch.y)
                             while afterMemes.count <= afterMemeCount {
@@ -312,14 +312,14 @@ class Animus2TouchMemeBag {
                     switch format {
                     case .grab:
                         
-                        if Animus2Controller.INSANE_VERIFY {
+                        if AnimusController.INSANE_VERIFY {
                             if animusTouch.touchID == nil {
                                 print("FATAL: We're doing \"snapshotAfter\" and have null touch ID... (Grab)")
                             }
                         }
                         
                         if let touchID = animusTouch.touchID {
-                            let newMeme = Animus2PartsFactory.shared.withdrawAnimusTouchMeme(touchID: touchID,
+                            let newMeme = AnimusPartsFactory.shared.withdrawAnimusTouchMeme(touchID: touchID,
                                                                                              x: animusTouch.x,
                                                                                              y: animusTouch.y)
                             while afterMemes.count <= afterMemeCount {
@@ -337,11 +337,11 @@ class Animus2TouchMemeBag {
         }
     }
     
-    func addMemeCommand(memeCommand: Animus2TouchMemeCommand) {
-        if Animus2Controller.INSANE_VERIFY {
+    func addMemeCommand(memeCommand: AnimusTouchMemeCommand) {
+        if AnimusController.INSANE_VERIFY {
             for checkIndex in 0..<memeCommandCount {
                 if memeCommands[checkIndex] === memeCommand {
-                    print("FATAL!!! The same MemeCommand was added to Animus2PartsFactory twice...")
+                    print("FATAL!!! The same MemeCommand was added to AnimusPartsFactory twice...")
                     fatalError("WOWOWOWOWOW????")
                 }
             }
@@ -358,8 +358,8 @@ class Animus2TouchMemeBag {
     ////////////////
     
 
-    func beforeMemesAdd(_ meme: Animus2TouchMeme) {
-        if Animus2Controller.INSANE_VERIFY {
+    func beforeMemesAdd(_ meme: AnimusTouchMeme) {
+        if AnimusController.INSANE_VERIFY {
             if beforeMemesContains(meme) {
                 print("FATAL ERROR: We're adding the same purgatory touch which is in regular touches...")
             }
@@ -377,7 +377,7 @@ class Animus2TouchMemeBag {
     // Seems correct; I don't see any possible
     // Chance that this could screw up!!!!!!!!!
     //
-    func beforeMemesContains(_ meme: Animus2TouchMeme) -> Bool {
+    func beforeMemesContains(_ meme: AnimusTouchMeme) -> Bool {
         for memeIndex in 0..<beforeMemeCount {
             if beforeMemes[memeIndex] === meme {
                 return true
@@ -405,7 +405,7 @@ class Animus2TouchMemeBag {
     // Seems correct; I don't see any possible
     // TODO: We don't even need this
     //
-    func beforeMemesCount(_ meme: Animus2TouchMeme) -> Int {
+    func beforeMemesCount(_ meme: AnimusTouchMeme) -> Int {
         var result = 0
         for memeIndex in 0..<beforeMemeCount {
             if meme === beforeMemes[memeIndex] {
@@ -419,9 +419,9 @@ class Animus2TouchMemeBag {
     //
     // Seems correct; I don't see any possible
     //
-    func beforeMemesRemove(_ meme: Animus2TouchMeme) -> Bool {
+    func beforeMemesRemove(_ meme: AnimusTouchMeme) -> Bool {
         
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             
             let touchCount = beforeMemesCount(meme)
             
@@ -455,7 +455,7 @@ class Animus2TouchMemeBag {
         beforeMemeCount -= numberRemoved
         
         if numberRemoved > 0 {
-            Animus2PartsFactory.shared.depositAnimusTouchMeme(meme)
+            AnimusPartsFactory.shared.depositAnimusTouchMeme(meme)
             return true
         } else {
             return false
@@ -464,10 +464,10 @@ class Animus2TouchMemeBag {
     
     
     
-    func afterMemesAdd(_ meme: Animus2TouchMeme) {
+    func afterMemesAdd(_ meme: AnimusTouchMeme) {
             
             
-            if Animus2Controller.INSANE_VERIFY {
+            if AnimusController.INSANE_VERIFY {
                 if afterMemesContains(meme) {
                     print("FATAL ERROR: We're adding the same purgatory touch which is in regular touches...")
                 }
@@ -485,7 +485,7 @@ class Animus2TouchMemeBag {
         // Seems correct; I don't see any possible
         // Chance that this could screw up!!!!!!!!!
         //
-        func afterMemesContains(_ meme: Animus2TouchMeme) -> Bool {
+        func afterMemesContains(_ meme: AnimusTouchMeme) -> Bool {
             for memeIndex in 0..<afterMemeCount {
                 if afterMemes[memeIndex] === meme {
                     return true
@@ -513,7 +513,7 @@ class Animus2TouchMemeBag {
         // Seems correct; I don't see any possible
         // TODO: We don't even need this
         //
-        func afterMemesCount(_ meme: Animus2TouchMeme) -> Int {
+        func afterMemesCount(_ meme: AnimusTouchMeme) -> Int {
             var result = 0
             for memeIndex in 0..<afterMemeCount {
                 if meme === afterMemes[memeIndex] {
@@ -527,9 +527,9 @@ class Animus2TouchMemeBag {
         //
         // Seems correct; I don't see any possible
         //
-        func afterMemesRemove(_ meme: Animus2TouchMeme) -> Bool {
+        func afterMemesRemove(_ meme: AnimusTouchMeme) -> Bool {
             
-            if Animus2Controller.INSANE_VERIFY {
+            if AnimusController.INSANE_VERIFY {
                 
                 let touchCount = afterMemesCount(meme)
                 
@@ -563,7 +563,7 @@ class Animus2TouchMemeBag {
             afterMemeCount -= numberRemoved
             
             if numberRemoved > 0 {
-                Animus2PartsFactory.shared.depositAnimusTouchMeme(meme)
+                AnimusPartsFactory.shared.depositAnimusTouchMeme(meme)
                 return true
             } else {
                 return false

@@ -1,5 +1,5 @@
 //
-//  Animus2Controller.swift
+//  AnimusController.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/7/24.
@@ -7,9 +7,9 @@
 
 import UIKit
 
-class Animus2Controller {
+class AnimusController {
     
-    var releaseGhostTestTouches = [Animus2Touch]()
+    var releaseGhostTestTouches = [AnimusTouch]()
     
     func notifyJiggleGrabbed_Grab(animationMode: AnimatonMode, jiggle: Jiggle) {
         print("notifyJiggleGrabbed_Grab(\(animationMode))")
@@ -57,7 +57,7 @@ class Animus2Controller {
         releaseGhostTestTouches.removeAll()
         for animusTouchIndex in 0..<releaseAnimusTouchCount {
             let animusTouch = releaseAnimusTouches[animusTouchIndex]
-            let clone = Animus2Touch()
+            let clone = AnimusTouch()
             clone.read(from: animusTouch)
             releaseGhostTestTouches.append(clone)
         }
@@ -103,46 +103,20 @@ class Animus2Controller {
     typealias Vector = Math.Vector
     
     // This list retains the touches.
-    var animusTouches = [Animus2Touch]()
+    var animusTouches = [AnimusTouch]()
     var animusTouchCount = 0
     
     // This list retains the touches.
-    var purgatoryAnimusTouches = [Animus2Touch]()
+    var purgatoryAnimusTouches = [AnimusTouch]()
     var purgatoryAnimusTouchCount = 0
     
     var tempAnimusTouchCount = 0
-    var tempAnimusTouches = [Animus2Touch]()
+    var tempAnimusTouches = [AnimusTouch]()
     
-    var releaseAnimusTouches = [Animus2Touch]()
+    var releaseAnimusTouches = [AnimusTouch]()
     var releaseAnimusTouchCount = 0
     
     var clock = Float(0.0)
-    
-    //
-    // Any time the list of touches change,
-    // we do a pre and post snapshot, then
-    // execute the commands...
-    //
-    @MainActor func snapshot_pre(jiggleViewModel: JiggleViewModel,
-                                 jiggleDocument: JiggleDocument,
-                                 animationMode: AnimatonMode) {
-        for jiggleIndex in 0..<jiggleDocument.jiggleCount {
-            let jiggle = jiggleDocument.jiggles[jiggleIndex]
-            jiggle.snapshotAnimusBefore(controller: self, animationMode: animationMode)
-        }
-    }
-    
-    @MainActor func snapshot_post(jiggleViewModel: JiggleViewModel,
-                                  jiggleDocument: JiggleDocument,
-                                  animationMode: AnimatonMode) {
-        for jiggleIndex in 0..<jiggleDocument.jiggleCount {
-            let jiggle = jiggleDocument.jiggles[jiggleIndex]
-            jiggle.snapshotAnimusAfterThenReconcileAndPerform(controller: self,
-                                                              jiggleViewModel: jiggleViewModel,
-                                                              jiggleDocument: jiggleDocument,
-                                                              animationMode: animationMode)
-        }
-    }
     
     @MainActor func update(deltaTime: Float,
                            jiggleViewModel: JiggleViewModel,
@@ -150,7 +124,7 @@ class Animus2Controller {
                            isGyroEnabled: Bool,
                            animationMode: AnimatonMode) {
         
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             for animusTouchIndex1 in 0..<purgatoryAnimusTouchCount {
                 let animusTouch1 = purgatoryAnimusTouches[animusTouchIndex1]
                 for animusTouchIndex2 in 0..<animusTouchCount {
@@ -163,9 +137,6 @@ class Animus2Controller {
         }
         
         clock += deltaTime
-        if clock > 99_999_999.0 {
-            clock -= 99_999_999.0
-        }
         
         for animusTouchIndex in 0..<purgatoryAnimusTouchCount {
             let animusTouch = purgatoryAnimusTouches[animusTouchIndex]
@@ -193,20 +164,26 @@ class Animus2Controller {
         }
     }
     
-    @MainActor func killDragAll(jiggleViewModel: JiggleViewModel,
-                                jiggleDocument: JiggleDocument,
-                                animationMode: AnimatonMode) {
-        snapshot_pre(jiggleViewModel: jiggleViewModel,
-                     jiggleDocument: jiggleDocument,
-                     animationMode: animationMode)
-        flushAnimusTouches_All(jiggleViewModel: jiggleViewModel,
-                               jiggleDocument: jiggleDocument,
-                               reason: .flushAllKillAllTouches)
-        flushPurgatoryAnimusTouches_All(jiggleViewModel: jiggleViewModel,
-                                        jiggleDocument: jiggleDocument)
-        snapshot_post(jiggleViewModel: jiggleViewModel,
-                      jiggleDocument: jiggleDocument,
-                      animationMode: animationMode)
+    @MainActor func checkContinuousDisabledAndFlushIfNeeded(jiggleViewModel: JiggleViewModel,
+                                                            jiggleDocument: JiggleDocument,
+                                                            animationMode: AnimatonMode) -> Bool {
+        if jiggleDocument.isContinuousDisableGrabEnabled == true {
+            switch animationMode {
+            case .unknown:
+                return false
+            case .grab:
+                return false
+            case .continuous:
+                flushAll(jiggleViewModel: jiggleViewModel,
+                         jiggleDocument: jiggleDocument,
+                         animationMode: animationMode)
+                return true
+            case .loops:
+                return false
+            }
+        } else {
+            return false
+        }
     }
     
     @MainActor func touchesBegan(jiggleViewModel: JiggleViewModel,
@@ -220,22 +197,17 @@ class Animus2Controller {
                                  touchTargetTouchSource: TouchTargetTouchSource,
                                  isPrecise: Bool) {
         
-        print("touchesBegan::")
-        
-        if jiggleDocument.isContinuousDisableGrabEnabled == true {
-            switch animationMode {
-            case .unknown:
-                break
-            case .grab:
-                break
-            case .continuous:
-                flushAll(jiggleViewModel: jiggleViewModel,
-                         jiggleDocument: jiggleDocument,
-                         animationMode: animationMode)
-                return
-            case .loops:
-                break
-            }
+        if checkContinuousDisabledAndFlushIfNeeded(jiggleViewModel: jiggleViewModel,
+                                                   jiggleDocument: jiggleDocument,
+                                                   animationMode: animationMode) {
+            _ = jiggleDocument.attemptSelectJiggle(points: points,
+                                                   includingFrozen: true,
+                                                   nullifySelectionIfWhiff: false,
+                                                   displayMode: displayMode,
+                                                   isGraphEnabled: isGraphEnabled,
+                                                   touchTargetTouchSource: touchTargetTouchSource,
+                                                   isPrecise: isPrecise)
+            return
         }
         
         snapshot_pre(jiggleViewModel: jiggleViewModel,
@@ -253,7 +225,7 @@ class Animus2Controller {
         for touchIndex in 0..<touches.count {
             let touch = touches[touchIndex]
             let point = points[touchIndex]
-            let animusTouch = Animus2PartsFactory.shared.withdrawAnimusTouch(touch: touch)
+            let animusTouch = AnimusPartsFactory.shared.withdrawAnimusTouch(touch: touch)
             animusTouch.x = point.x
             animusTouch.y = point.y
             addAnimusTouch(animusTouch: animusTouch)
@@ -303,20 +275,10 @@ class Animus2Controller {
                                  touchTargetTouchSource: TouchTargetTouchSource,
                                  isPrecise: Bool) {
         
-        if jiggleDocument.isContinuousDisableGrabEnabled == true {
-            switch animationMode {
-            case .unknown:
-                break
-            case .grab:
-                break
-            case .continuous:
-                flushAll(jiggleViewModel: jiggleViewModel,
-                         jiggleDocument: jiggleDocument,
-                         animationMode: animationMode)
-                return
-            case .loops:
-                break
-            }
+        if checkContinuousDisabledAndFlushIfNeeded(jiggleViewModel: jiggleViewModel,
+                                                   jiggleDocument: jiggleDocument,
+                                                   animationMode: animationMode) {
+            return
         }
         
         snapshot_pre(jiggleViewModel: jiggleViewModel,
@@ -363,22 +325,10 @@ class Animus2Controller {
                                  displayMode: DisplayMode,
                                  isGraphEnabled: Bool) {
         
-        print("touchesEnded::")
-        
-        if jiggleDocument.isContinuousDisableGrabEnabled == true {
-            switch animationMode {
-            case .unknown:
-                break
-            case .grab:
-                break
-            case .continuous:
-                flushAll(jiggleViewModel: jiggleViewModel,
-                         jiggleDocument: jiggleDocument,
-                         animationMode: animationMode)
-                return
-            case .loops:
-                break
-            }
+        if checkContinuousDisabledAndFlushIfNeeded(jiggleViewModel: jiggleViewModel,
+                                                   jiggleDocument: jiggleDocument,
+                                                   animationMode: animationMode) {
+            return
         }
         
         snapshot_pre(jiggleViewModel: jiggleViewModel,
@@ -399,127 +349,13 @@ class Animus2Controller {
             let animusTouch = tempAnimusTouches[animusTouchIndex]
             _ = removeAnimusTouch(jiggleViewModel: jiggleViewModel,
                                   jiggleDocument: jiggleDocument,
-                                  animusTouch: animusTouch,
-                                  reason: .touchesEnded)
+                                  animusTouch: animusTouch)
         }
         
         snapshot_post(jiggleViewModel: jiggleViewModel,
                       jiggleDocument: jiggleDocument,
                       animationMode: animationMode)
         
-    }
-    
-    @MainActor func handleJigglesDidChange(jiggleViewModel: JiggleViewModel,
-                                           jiggleDocument: JiggleDocument,
-                                           animationMode: AnimatonMode) {
-        snapshot_pre(jiggleViewModel: jiggleViewModel,
-                     jiggleDocument: jiggleDocument,
-                     animationMode: animationMode)
-        flushAnimusTouches_Orphaned(jiggleViewModel: jiggleViewModel,
-                                    jiggleDocument: jiggleDocument)
-        snapshot_post(jiggleViewModel: jiggleViewModel,
-                      jiggleDocument: jiggleDocument,
-                      animationMode: animationMode)
-    }
-    
-    // Review notes:
-    // We really want a way to force all the instructions
-    // to un-drag as well... It's redundant, but it makes sense
-    // For example, if we resulted in a fling, the fling should
-    // be cancelled.
-    @MainActor func handleDocumentModeDidChange(jiggleViewModel: JiggleViewModel,
-                                                jiggleDocument: JiggleDocument,
-                                                animationMode: AnimatonMode) {
-        flushAll(jiggleViewModel: jiggleViewModel,
-                 jiggleDocument: jiggleDocument,
-                 animationMode: animationMode)
-    }
-    
-    @MainActor func applicationWillResignActive(jiggleViewModel: JiggleViewModel,
-                                                jiggleDocument: JiggleDocument,
-                                                animationMode: AnimatonMode) {
-        flushAll(jiggleViewModel: jiggleViewModel,
-                 jiggleDocument: jiggleDocument,
-                 animationMode: animationMode)
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    @MainActor func removeAnimusTouch(jiggleViewModel: JiggleViewModel,
-                                      jiggleDocument: JiggleDocument,
-                                      animusTouch: Animus2Touch,
-                                      reason: Animus2TouchRemoveReason) -> Bool {
-        
-        if let aid = animusTouch.touchID {
-            print("removeAnimusTouch @ \(animusTouch.touchID), reason = \(reason)")
-        } else {
-            print("FATAL: We housing unidentified touch...???")
-        }
-        
-        let touchCount = animusTouchesCount(animusTouch)
-        
-        if touchCount > 1 {
-            print("FATAL: We have a touch more than once...")
-        }
-        
-        if touchCount <= 0 {
-            print("FATAL: We are removing a touch that's not in the list?!?!")
-            return false
-        }
-        
-        
-        
-        // This should be the single point of where we
-        // can stop a continuous grab...
-        
-        
-        var numberRemoved = 0
-        var removeLoopIndex = 0
-        while removeLoopIndex < animusTouchCount {
-            if animusTouches[removeLoopIndex] === animusTouch {
-                break
-            } else {
-                removeLoopIndex += 1
-            }
-        }
-        while removeLoopIndex < animusTouchCount {
-            if animusTouches[removeLoopIndex] === animusTouch {
-                numberRemoved += 1
-            } else {
-                animusTouches[removeLoopIndex - numberRemoved] = animusTouches[removeLoopIndex]
-            }
-            removeLoopIndex += 1
-        }
-        animusTouchCount -= numberRemoved
-        
-        
-        
-        
-        
-        if numberRemoved > 0 {
-            
-            // The touch will be out of *this* list...
-            
-            // Let's see if we were the final touch
-            // from a continuous dragging effort...
-            switch animusTouch.residency {
-            case .unassigned:
-                Animus2PartsFactory.shared.depositAnimusTouch(animusTouch)
-            case .jiggleContinuous(let jiggle):
-                Animus2PartsFactory.shared.depositAnimusTouch(animusTouch)
-            case .jiggleGrab:
-                purgatoryAnimusTouchesAdd(animusTouch)
-            }
-            
-            return true
-        } else {
-            return false
-        }
     }
     
 }

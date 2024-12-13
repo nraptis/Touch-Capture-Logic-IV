@@ -1,5 +1,5 @@
 //
-//  Animus2TouchMemeCommandType.swift
+//  AnimusTouchMemeCommandType.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/8/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Animus2TouchMemeCommandType {
+enum AnimusTouchMemeCommandType {
     case add
     case remove
     case move

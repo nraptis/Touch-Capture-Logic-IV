@@ -1,5 +1,5 @@
 //
-//  Animus2TouchPointerBag+Rotation.swift
+//  AnimusTouchPointerBag+Rotation.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/11/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Animus2TouchPointerBag {
+extension AnimusTouchPointerBag {
     
     //
     // [Touch Routes Verify] 12-11-2024
@@ -23,7 +23,7 @@ extension Animus2TouchPointerBag {
                 let diffX = averageX - touchPointer.x
                 let diffY = averageY - touchPointer.y
                 let captureStartDistanceSquared = diffX * diffX + diffY * diffY
-                if captureStartDistanceSquared > Animus2TouchPointerBag.captureTrackDistanceThresholdSquared {
+                if captureStartDistanceSquared > AnimusTouchPointerBag.captureTrackDistanceThresholdSquared {
                     let captureStartAngle = -atan2f(diffX, diffY)
                     touchPointer.captureStartAngle = captureStartAngle
                     touchPointer.captureTrackAngle = captureStartAngle
@@ -89,6 +89,43 @@ extension Animus2TouchPointerBag {
         }
     }
     
+    func captureTrack_PrepareRotate(jiggle: Jiggle, averageX: Float, averageY: Float) -> Bool {
+        var numberOfCapturedTouchPointers = 0
+        for touchPointerIndex in 0..<touchPointerCount {
+            let touchPointer = touchPointers[touchPointerIndex]
+            if (touchPointer.isConsidered == true) && (touchPointer.isCaptureStartRotateValid == true) {
+                let diffX = averageX - touchPointer.x
+                let diffY = averageY - touchPointer.y
+                let captureTrackDistanceSquared = diffX * diffX + diffY * diffY
+                if captureTrackDistanceSquared > Self.captureTrackDistanceThresholdSquared {
+                    let captureTrackAngle = -atan2f(diffX, diffY)
+                    
+                    let previousCaptureTrackAngleFixed = touchPointer.captureTrackAngleFixed
+                    var captureTrackAngleFixed = captureTrackAngle
+                    var bestDistance = Float(100_000_000.0)
+                    for step in -3...3 {
+                        let tryAngle = Float(step) * (Math.pi2) + captureTrackAngle
+                        let tryDistance = fabsf(tryAngle - previousCaptureTrackAngleFixed)
+                        if tryDistance < bestDistance {
+                            bestDistance = tryDistance
+                            captureTrackAngleFixed = tryAngle
+                        }
+                    }
+                    
+                    touchPointer.captureTrackAngle = captureTrackAngle
+                    touchPointer.captureTrackAngleFixed = captureTrackAngleFixed
+                    touchPointer.captureTrackAngleDifference = touchPointer.captureTrackAngleFixed - touchPointer.captureStartAngle
+                }
+                numberOfCapturedTouchPointers += 1
+            }
+        }
+        if numberOfCapturedTouchPointers > 1 {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     // @Precondition: captureTrack_PrepareRotate
     @MainActor func captureTrack_Rotate(jiggle: Jiggle,
                                         jiggleDocument: JiggleDocument,
@@ -139,45 +176,26 @@ extension Animus2TouchPointerBag {
         case .grab:
             break
         case .continuous:
-            var fixedRotation = fmodf(newRotation, Math.pi2)
-            if fixedRotation > Math.pi { fixedRotation -= Math.pi2 }
-            if fixedRotation < Math._pi { fixedRotation += Math.pi2 }
-            let rotationU2 = Jiggle.animationCursorFalloffRotation_U2
-            let rotationD2 = Jiggle.animationCursorFalloffRotation_D2
-            var rotationPercent = Float(fixedRotation - rotationD2) / (rotationU2 - rotationD2)
-            if rotationPercent > 1.0 { rotationPercent = 1.0 }
-            if rotationPercent < 0.0 { rotationPercent = 0.0 }
-            let angleMin = Animus2InstructionContinuous.userContinuousRotationMin
-            let angleMax = Animus2InstructionContinuous.userContinuousRotationMax
-            jiggle.continuousStartRotation = angleMin + (angleMax - angleMin) * rotationPercent
-            jiggleDocument.animationContinuousRotationPublisher.send(())
+            registerContinuousStartRotation(jiggle: jiggle,
+                                            jiggleDocument: jiggleDocument)
         }
     }
     
-    func captureTrack_PrepareRotate(jiggle: Jiggle, averageX: Float, averageY: Float) -> Bool {
-        var numberOfCapturedTouchPointers = 0
-        for touchPointerIndex in 0..<touchPointerCount {
-            let touchPointer = touchPointers[touchPointerIndex]
-            if (touchPointer.isConsidered == true) && (touchPointer.isCaptureStartRotateValid == true) {
-                let diffX = averageX - touchPointer.x
-                let diffY = averageY - touchPointer.y
-                let captureTrackDistanceSquared = diffX * diffX + diffY * diffY
-                if captureTrackDistanceSquared > Self.captureTrackDistanceThresholdSquared {
-                    let captureTrackAngle = -atan2f(diffX, diffY)
-                    let captureTrackAngleFixed = Animus2Utilities.findGoodNextAngle(captureTrackAngle: touchPointer.captureTrackAngleFixed,
-                                                                                    proposedAngle: captureTrackAngle)
-                    touchPointer.captureTrackAngle = captureTrackAngle
-                    touchPointer.captureTrackAngleFixed = captureTrackAngleFixed
-                    touchPointer.captureTrackAngleDifference = touchPointer.captureTrackAngleFixed - touchPointer.captureStartAngle
-                }
-                numberOfCapturedTouchPointers += 1
-            }
-        }
-        if numberOfCapturedTouchPointers > 1 {
-            return true
-        } else {
-            return false
-        }
+    @MainActor func registerContinuousStartRotation(jiggle: Jiggle,
+                                                    jiggleDocument: JiggleDocument) {
+        var fixedRotation = fmodf(jiggle.animationCursorRotation, Math.pi2)
+        if fixedRotation > Math.pi { fixedRotation -= Math.pi2 }
+        if fixedRotation < Math._pi { fixedRotation += Math.pi2 }
+        let rotationU2 = Jiggle.animationCursorFalloffRotation_U2
+        let rotationD2 = Jiggle.animationCursorFalloffRotation_D2
+        var rotationPercent = Float(fixedRotation - rotationD2) / (rotationU2 - rotationD2)
+        if rotationPercent > 1.0 { rotationPercent = 1.0 }
+        if rotationPercent < 0.0 { rotationPercent = 0.0 }
+        let angleMin = AnimusInstructionContinuous.userContinuousRotationMin
+        let angleMax = AnimusInstructionContinuous.userContinuousRotationMax
+        jiggle.continuousStartRotation = angleMin + (angleMax - angleMin) * rotationPercent
+        jiggleDocument.animationContinuousRotationPublisher.send(())
+        
     }
     
 }

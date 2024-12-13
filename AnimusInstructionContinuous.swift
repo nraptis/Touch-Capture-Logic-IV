@@ -1,5 +1,5 @@
 //
-//  Animus2InstructionContinuous.swift
+//  AnimusInstructionContinuous.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/7/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Animus2InstructionContinuous {
+class AnimusInstructionContinuous {
     
     static let userContinuousAngleMin = Float(-180.0)
     static let userContinuousAngleMax = Float(180.0)
@@ -47,8 +47,8 @@ class Animus2InstructionContinuous {
     
     // No knowledge of meme bag.
     // It operates on a command, and the list of active touches...
-    let pointerBag = Animus2TouchPointerBag(format: .continuous)
-    let memeBag = Animus2TouchMemeBag(format: .continuous)
+    let pointerBag = AnimusTouchPointerBag(format: .continuous)
+    let memeBag = AnimusTouchMemeBag(format: .continuous)
     
     init() {
         
@@ -56,7 +56,7 @@ class Animus2InstructionContinuous {
     
     @MainActor func performMemeCommands(jiggle: Jiggle,
                                         jiggleDocument: JiggleDocument,
-                                        controller: Animus2Controller) {
+                                        controller: AnimusController) {
         
         // we do them in order..
         for commandIndex in 0..<memeBag.memeCommandCount {
@@ -89,15 +89,15 @@ class Animus2InstructionContinuous {
     
     func captureStart(jiggle: Jiggle,
                       jiggleDocument: JiggleDocument,
-                      controller: Animus2Controller,
-                      command: Animus2TouchMemeCommand) {
+                      controller: AnimusController,
+                      command: AnimusTouchMemeCommand) {
         _ = pointerBag.captureStart(jiggle: jiggle)
     }
     
     @MainActor func captureTrack(jiggle: Jiggle,
                       jiggleDocument: JiggleDocument,
-                      controller: Animus2Controller,
-                      command: Animus2TouchMemeCommand) {
+                      controller: AnimusController,
+                      command: AnimusTouchMemeCommand) {
         _ = pointerBag.captureTrack(jiggle: jiggle,
                                     jiggleDocument: jiggleDocument)
     }
@@ -125,6 +125,13 @@ class Animus2InstructionContinuous {
             continuousFrame = _continuousDuration - (_continuousDuration * __continuousFrameOffset)
             print("offset is \(__continuousFrameOffset) pct, we start at \(continuousFrame) / \(_continuousDuration)...")
         }
+    }
+    
+    @MainActor func captureContinuousStartConditions(jiggle: Jiggle,
+                                                     jiggleDocument: JiggleDocument) {
+        jiggle.animusInstructionContinuous.pointerBag.continuousRegisterAllStartValues(jiggle: jiggle,
+                                                                                       jiggleDocument: jiggleDocument)
+        jiggleDocument.animationContinuousSyncAllPublisher.send(())
     }
     
     func update_Inactive(deltaTime: Float) {
@@ -192,23 +199,6 @@ class Animus2InstructionContinuous {
                 
                 let _continuousStartRotation = (jiggle.continuousStartRotation - Self.userContinuousRotationMin) / (Self.userContinuousRotationMax - Self.userContinuousRotationMin)
                 let _continuousEndRotation = (jiggle.continuousEndRotation - Self.userContinuousRotationMin) / (Self.userContinuousRotationMax - Self.userContinuousRotationMin)
-                
-                
-                
-                /*
-                var fixedRotation = fmodf(newRotation, Math.pi2)
-                if fixedRotation > Math.pi { fixedRotation -= Math.pi2 }
-                if fixedRotation < Math._pi { fixedRotation += Math.pi2 }
-                let rotationU2 = Jiggle.animationCursorFalloffRotation_U2
-                let rotationD2 = Jiggle.animationCursorFalloffRotation_D2
-                var rotationPercent = Float(fixedRotation - rotationD2) / (rotationU2 - rotationD2)
-                if rotationPercent > 1.0 { rotationPercent = 1.0 }
-                if rotationPercent < 0.0 { rotationPercent = 0.0 }
-                let angleMin = Animus2InstructionContinuous.userContinuousAngleMin
-                let angleMax = Animus2InstructionContinuous.userContinuousAngleMax
-                jiggle.continuousStartRotation = angleMin + (angleMax - angleMin) * rotationPercent
-                jiggleDocument.animationContinuousRotationPublisher.send(())
-                */
                 
                 let measurePercentLinear = Jiggle.getMeasurePercentLinear(measuredSize: jiggle.measuredSize)
                 let distanceR2 = Jiggle.getAnimationCursorFalloffDistance_R2(measurePercentLinear: measurePercentLinear)

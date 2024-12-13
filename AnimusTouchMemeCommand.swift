@@ -1,5 +1,5 @@
 //
-//  Animus2TouchMemeCommand.swift
+//  AnimusTouchMemeCommand.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/8/24.
@@ -7,14 +7,14 @@
 
 import Foundation
 
-class Animus2TouchMemeCommand {
+class AnimusTouchMemeCommand {
     
-    var type = Animus2TouchMemeCommandType.move
+    var type = AnimusTouchMemeCommandType.move
     
-    var chunks = [Animus2TouchMemeCommandChunk]()
+    var chunks = [AnimusTouchMemeCommandChunk]()
     var chunkCount = 0
     
-    func addChunk(chunk: Animus2TouchMemeCommandChunk) {
+    func addChunk(chunk: AnimusTouchMemeCommandChunk) {
         while chunks.count <= chunkCount {
             chunks.append(chunk)
         }
@@ -26,7 +26,6 @@ class Animus2TouchMemeCommand {
         for chunkIndex in 0..<chunkCount {
             let chunk = chunks[chunkIndex]
             switch chunk {
-                
             case .add(let oid, _, _):
                 if oid == touchID {
                     return true

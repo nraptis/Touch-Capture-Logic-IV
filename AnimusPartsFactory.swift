@@ -1,5 +1,5 @@
 //
-//  Animus2PartsFactory.swift
+//  AnimusPartsFactory.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/7/24.
@@ -7,9 +7,9 @@
 
 import UIKit
 
-class Animus2PartsFactory {
+class AnimusPartsFactory {
     
-    nonisolated(unsafe) static let shared = Animus2PartsFactory()
+    nonisolated(unsafe) static let shared = AnimusPartsFactory()
     
     private init() {
         
@@ -18,16 +18,14 @@ class Animus2PartsFactory {
     ////////////////
     ///
     ///
-    private var animusTouches = [Animus2Touch]()
+    private var animusTouches = [AnimusTouch]()
     var animusTouchCount = 0
-    func depositAnimusTouch(_ animusTouch: Animus2Touch) {
+    func depositAnimusTouch(_ animusTouch: AnimusTouch) {
         
-        
-        if Animus2Controller.INSANE_VERIFY {
-            
+        if AnimusController.INSANE_VERIFY {
             for checkIndex in 0..<animusTouchCount {
                 if animusTouches[checkIndex] === animusTouch {
-                    print("FATAL!!! The same touch was added to Animus2PartsFactory twice...")
+                    print("FATAL!!! The same touch was added to AnimusPartsFactory twice...")
                     fatalError("WOWOWOWOWOW????")
                 }
             }
@@ -39,9 +37,6 @@ class Animus2PartsFactory {
         animusTouch.residency = .unassigned
         animusTouch.isExpired = false
         
-        
-        
-        
         while animusTouches.count <= animusTouchCount {
             animusTouches.append(animusTouch)
         }
@@ -49,14 +44,14 @@ class Animus2PartsFactory {
         animusTouchCount += 1
     }
     
-    func withdrawAnimusTouch(touch: UITouch) -> Animus2Touch {
+    func withdrawAnimusTouch(touch: UITouch) -> AnimusTouch {
         if animusTouchCount > 0 {
             animusTouchCount -= 1
             let result = animusTouches[animusTouchCount]
             result.touchID = ObjectIdentifier(touch)
             return result
         }
-        let result = Animus2Touch()
+        let result = AnimusTouch()
         result.touchID = ObjectIdentifier(touch)
         return result
     }
@@ -69,13 +64,13 @@ class Animus2PartsFactory {
     ////////////////
     ///
     ///
-    private var animusTouchMemes = [Animus2TouchMeme]()
+    private var animusTouchMemes = [AnimusTouchMeme]()
     var animusTouchMemeCount = 0
-    func depositAnimusTouchMeme(_ animusTouchMeme: Animus2TouchMeme) {
-        if Animus2Controller.INSANE_VERIFY {
+    func depositAnimusTouchMeme(_ animusTouchMeme: AnimusTouchMeme) {
+        if AnimusController.INSANE_VERIFY {
             for checkIndex in 0..<animusTouchMemeCount {
                 if animusTouchMemes[checkIndex] === animusTouchMeme {
-                    print("FATAL!!! The same meme was added to Animus2PartsFactory twice...")
+                    print("FATAL!!! The same meme was added to AnimusPartsFactory twice...")
                     fatalError("WOWOWOWOWOW????")
                 }
             }
@@ -90,7 +85,7 @@ class Animus2PartsFactory {
     
     func withdrawAnimusTouchMeme(touchID: ObjectIdentifier,
                                  x: Float,
-                                 y: Float) -> Animus2TouchMeme {
+                                 y: Float) -> AnimusTouchMeme {
         if animusTouchMemeCount > 0 {
             animusTouchMemeCount -= 1
             let result = animusTouchMemes[animusTouchMemeCount]
@@ -99,7 +94,7 @@ class Animus2PartsFactory {
             result.y = y
             return result
         }
-        let result = Animus2TouchMeme(x: x,
+        let result = AnimusTouchMeme(x: x,
                                       y: y,
                                       touchID: touchID)
         return result
@@ -112,13 +107,13 @@ class Animus2PartsFactory {
     ////////////////
     ///
     ///
-    private var animusTouchMemeCommands = [Animus2TouchMemeCommand]()
+    private var animusTouchMemeCommands = [AnimusTouchMemeCommand]()
     var animusTouchMemeCommandCount = 0
-    func depositAnimusTouchMemeCommand(_ animusTouchMemeCommand: Animus2TouchMemeCommand) {
-        if Animus2Controller.INSANE_VERIFY {
+    func depositAnimusTouchMemeCommand(_ animusTouchMemeCommand: AnimusTouchMemeCommand) {
+        if AnimusController.INSANE_VERIFY {
             for checkIndex in 0..<animusTouchMemeCommandCount {
                 if animusTouchMemeCommands[checkIndex] === animusTouchMemeCommand {
-                    print("FATAL!!! The same MemeCommand was added to Animus2PartsFactory twice...")
+                    print("FATAL!!! The same MemeCommand was added to AnimusPartsFactory twice...")
                     fatalError("WOWOWOWOWOW????")
                 }
             }
@@ -131,13 +126,13 @@ class Animus2PartsFactory {
         animusTouchMemeCommandCount += 1
     }
     
-    func withdrawAnimusTouchMemeCommand() -> Animus2TouchMemeCommand {
+    func withdrawAnimusTouchMemeCommand() -> AnimusTouchMemeCommand {
         if animusTouchMemeCommandCount > 0 {
             animusTouchMemeCommandCount -= 1
             let result = animusTouchMemeCommands[animusTouchMemeCommandCount]
             return result
         }
-        let result = Animus2TouchMemeCommand()
+        let result = AnimusTouchMemeCommand()
         return result
     }
     ///
@@ -148,13 +143,13 @@ class Animus2PartsFactory {
     ////////////////
     ///
     ///
-    private var animusTouchPointers = [Animus2TouchPointer]()
+    private var animusTouchPointers = [AnimusTouchPointer]()
     var animusTouchPointerCount = 0
-    func depositAnimusTouchPointer(_ animusTouchPointer: Animus2TouchPointer) {
-        if Animus2Controller.INSANE_VERIFY {
+    func depositAnimusTouchPointer(_ animusTouchPointer: AnimusTouchPointer) {
+        if AnimusController.INSANE_VERIFY {
             for checkIndex in 0..<animusTouchPointerCount {
                 if animusTouchPointers[checkIndex] === animusTouchPointer {
-                    print("FATAL!!! The same Pointer was added to Animus2PartsFactory twice...")
+                    print("FATAL!!! The same Pointer was added to AnimusPartsFactory twice...")
                     fatalError("WOWOWOWOWOW????")
                 }
             }
@@ -174,14 +169,14 @@ class Animus2PartsFactory {
         animusTouchPointerCount += 1
     }
     
-    func withdrawAnimusTouchPointer(touchID: ObjectIdentifier) -> Animus2TouchPointer {
+    func withdrawAnimusTouchPointer(touchID: ObjectIdentifier) -> AnimusTouchPointer {
         if animusTouchPointerCount > 0 {
             animusTouchPointerCount -= 1
             let result = animusTouchPointers[animusTouchPointerCount]
             result.touchID = touchID
             return result
         }
-        let result = Animus2TouchPointer(touchID: touchID)
+        let result = AnimusTouchPointer(touchID: touchID)
         return result
     }
     ///

@@ -1,5 +1,5 @@
 //
-//  Animus2TouchPointerActionType.swift
+//  AnimusTouchPointerActionType.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/8/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Animus2TouchPointerActionType {
+enum AnimusTouchPointerActionType {
     case detached
     case retained(Float, Float)
     case add(Float, Float)

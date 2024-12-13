@@ -1,5 +1,5 @@
 //
-//  Animus2TouchHistory.swift
+//  AnimusTouchHistory.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/7/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Animus2TouchHistory {
+class AnimusTouchHistory {
     
     var historyCount: Int = 0
     //var historySize: Int = 12
@@ -26,34 +26,34 @@ class Animus2TouchHistory {
     var historyDiffTime = [Float]()
     
     init() {
-        for _ in 0..<Animus2TouchHistory.historySize {
+        for _ in 0..<AnimusTouchHistory.historySize {
             historyX.append(0.0)
         }
-        for _ in 0..<Animus2TouchHistory.historySize {
+        for _ in 0..<AnimusTouchHistory.historySize {
             historyY.append(0.0)
         }
-        for _ in 0..<Animus2TouchHistory.historySize {
+        for _ in 0..<AnimusTouchHistory.historySize {
             historyTime.append(0.0)
         }
-        for _ in 0..<Animus2TouchHistory.historySize {
+        for _ in 0..<AnimusTouchHistory.historySize {
             historyExpired.append(false)
         }
-        for _ in 0..<Animus2TouchHistory.historySize {
+        for _ in 0..<AnimusTouchHistory.historySize {
             historyDiffX.append(0.0)
         }
-        for _ in 0..<Animus2TouchHistory.historySize {
+        for _ in 0..<AnimusTouchHistory.historySize {
             historyDiffY.append(0.0)
         }
-        for _ in 0..<Animus2TouchHistory.historySize {
+        for _ in 0..<AnimusTouchHistory.historySize {
             historyDiffMagnitude.append(0.0)
         }
-        for _ in 0..<Animus2TouchHistory.historySize {
+        for _ in 0..<AnimusTouchHistory.historySize {
             historyDiffTime.append(0.0)
         }
     }
     
     func update(deltaTime: Float, clock: Float) {
-        let historyExpireClock = clock - Animus2Touch.historyExpireTime
+        let historyExpireClock = clock - AnimusTouch.historyExpireTime
         for historyIndex in 0..<historyCount {
             if historyTime[historyIndex] <= historyExpireClock {
                 historyExpired[historyIndex] = true
@@ -75,10 +75,11 @@ class Animus2TouchHistory {
         historyCount = 0
     }
     
-    func read(from animusTouchHistory: Animus2TouchHistory) {
+    //TODO: This is only used for test
+    func read(from animusTouchHistory: AnimusTouchHistory) {
         
         historyCount = animusTouchHistory.historyCount
-        for index in 0..<Animus2TouchHistory.historySize {
+        for index in 0..<AnimusTouchHistory.historySize {
             historyX[index] = animusTouchHistory.historyX[index]
             historyY[index] = animusTouchHistory.historyY[index]
             
@@ -100,23 +101,23 @@ class Animus2TouchHistory {
     func recordHistory(clock: Float,
                                 x: Float,
                                 y: Float) {
-        if historyCount < Animus2TouchHistory.historySize {
+        if historyCount < AnimusTouchHistory.historySize {
             historyX[historyCount] = x
             historyY[historyCount] = y
             historyTime[historyCount] = clock
             historyExpired[historyCount] = false
             historyCount += 1
         } else {
-            for i in 1..<Animus2TouchHistory.historySize {
+            for i in 1..<AnimusTouchHistory.historySize {
                 historyX[i - 1] = historyX[i]
                 historyY[i - 1] = historyY[i]
                 historyTime[i - 1] = historyTime[i]
                 historyExpired[i - 1] = historyExpired[i]
             }
-            historyX[Animus2TouchHistory.historySize - 1] = x
-            historyY[Animus2TouchHistory.historySize - 1] = y
-            historyTime[Animus2TouchHistory.historySize - 1] = clock
-            historyExpired[Animus2TouchHistory.historySize - 1] = false
+            historyX[AnimusTouchHistory.historySize - 1] = x
+            historyY[AnimusTouchHistory.historySize - 1] = y
+            historyTime[AnimusTouchHistory.historySize - 1] = clock
+            historyExpired[AnimusTouchHistory.historySize - 1] = false
         }
     }
     

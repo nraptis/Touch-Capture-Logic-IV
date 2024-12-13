@@ -1,5 +1,5 @@
 //
-//  Animus2TouchPointerBag+Scale.swift
+//  AnimusTouchPointerBag+Scale.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/11/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Animus2TouchPointerBag {
+extension AnimusTouchPointerBag {
     
     //
     // [Touch Routes Verify] 12-11-2024
@@ -23,7 +23,7 @@ extension Animus2TouchPointerBag {
                 let diffX = averageX - touchPointer.x
                 let diffY = averageY - touchPointer.y
                 let captureStartDistanceSquared = diffX * diffX + diffY * diffY
-                if captureStartDistanceSquared > Animus2TouchPointerBag.captureTrackDistanceThresholdSquared {
+                if captureStartDistanceSquared > AnimusTouchPointerBag.captureTrackDistanceThresholdSquared {
                     let captureStartDistance = sqrtf(captureStartDistanceSquared)
                     touchPointer.captureStartDistance = captureStartDistance
                     touchPointer.captureTrackDistance = captureStartDistance
@@ -89,7 +89,7 @@ extension Animus2TouchPointerBag {
         }
     }
     
-    func captureTrack_PrepareScale(jiggle: Jiggle, averageX: Float, averageY: Float) -> Animus2TouchPointerScaleResponse {
+    func captureTrack_PrepareScale(jiggle: Jiggle, averageX: Float, averageY: Float) -> AnimusTouchPointerScaleResponse {
         let scaleWeightUnit = Jiggle.getAnimationCursorScaleWeightUnit(measuredSize: jiggle.measuredSize)
         var startDistanceSum = Float(0.0)
         var trackDistanceSum = Float(0.0)
@@ -112,19 +112,19 @@ extension Animus2TouchPointerBag {
             }
         }
         if numberOfCapturedTouchPointers > 1 {
-            let scaleData = Animus2TouchPointerScaleData(startDistanceSum: startDistanceSum,
+            let scaleData = AnimusTouchPointerScaleData(startDistanceSum: startDistanceSum,
                                                          trackDistanceSum: trackDistanceSum,
                                                          weightSum: weightSum)
-            return Animus2TouchPointerScaleResponse.valid(scaleData)
+            return AnimusTouchPointerScaleResponse.valid(scaleData)
         } else {
-            return Animus2TouchPointerScaleResponse.invalid
+            return AnimusTouchPointerScaleResponse.invalid
         }
     }
     
     // @Precondition: captureTrack_PrepareScale
     @MainActor func captureTrack_Scale(jiggle: Jiggle,
                                        jiggleDocument: JiggleDocument,
-                                       scaleData: Animus2TouchPointerScaleData,
+                                       scaleData: AnimusTouchPointerScaleData,
                                        averageX: Float,
                                        averageY: Float) {
         
@@ -173,24 +173,32 @@ extension Animus2TouchPointerBag {
         case .grab:
             break
         case .continuous:
-            let scaleU2 = Jiggle.animationCursorFalloffScale_U2
-            let scaleD2 = Jiggle.animationCursorFalloffScale_D2
-            var scalePercent = Float(0.5)
-            if newScale > 1.0 {
-                var percentUp = (newScale - 1.0) / (scaleU2 - 1.0)
-                if percentUp > 1.0 { percentUp = 1.0 }
-                if percentUp < 0.0 { percentUp = 0.0 }
-                scalePercent = 0.5 + percentUp * 0.5
-            } else if newScale < 1.0 {
-                var percentDown = (1.0 - newScale) / (1.0 - scaleD2)
-                if percentDown > 1.0 { percentDown = 1.0 }
-                if percentDown < 0.0 { percentDown = 0.0 }
-                scalePercent = 0.5 - percentDown * 0.5
-            }
-            let scaleMin = Animus2InstructionContinuous.userContinuousScaleMin
-            let scaleMax = Animus2InstructionContinuous.userContinuousScaleMax
-            jiggle.continuousStartScale = scaleMin + (scaleMax - scaleMin) * scalePercent
-            jiggleDocument.animationContinuousScalePublisher.send(())
+            registerContinuousStartScale(jiggle: jiggle,
+                                         jiggleDocument: jiggleDocument)
         }
+    }
+    
+    @MainActor func registerContinuousStartScale(jiggle: Jiggle,
+                                                 jiggleDocument: JiggleDocument) {
+        let scale = jiggle.animationCursorScale
+        let scaleU2 = Jiggle.animationCursorFalloffScale_U2
+        let scaleD2 = Jiggle.animationCursorFalloffScale_D2
+        var scalePercent = Float(0.5)
+        if scale > 1.0 {
+            var percentUp = (scale - 1.0) / (scaleU2 - 1.0)
+            if percentUp > 1.0 { percentUp = 1.0 }
+            if percentUp < 0.0 { percentUp = 0.0 }
+            scalePercent = 0.5 + percentUp * 0.5
+        } else if scale < 1.0 {
+            var percentDown = (1.0 - scale) / (1.0 - scaleD2)
+            if percentDown > 1.0 { percentDown = 1.0 }
+            if percentDown < 0.0 { percentDown = 0.0 }
+            scalePercent = 0.5 - percentDown * 0.5
+        }
+        let scaleMin = AnimusInstructionContinuous.userContinuousScaleMin
+        let scaleMax = AnimusInstructionContinuous.userContinuousScaleMax
+        jiggle.continuousStartScale = scaleMin + (scaleMax - scaleMin) * scalePercent
+        jiggleDocument.animationContinuousScalePublisher.send(())
+        
     }
 }

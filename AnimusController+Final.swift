@@ -1,5 +1,5 @@
 //
-//  Animus2Controller+Final.swift
+//  AnimusController+Final.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/7/24.
@@ -7,14 +7,46 @@
 
 import UIKit
 
-extension Animus2Controller {
+extension AnimusController {
+    
+    // [Touch Routes Verify] 12-13-2024
+    //
+    // Seems correct; The only thing you
+    // may want to change is funtion name.
+    //
+    @MainActor func snapshot_pre(jiggleViewModel: JiggleViewModel,
+                                 jiggleDocument: JiggleDocument,
+                                 animationMode: AnimatonMode) {
+        for jiggleIndex in 0..<jiggleDocument.jiggleCount {
+            let jiggle = jiggleDocument.jiggles[jiggleIndex]
+            jiggle.snapshotAnimusBefore(controller: self, animationMode: animationMode)
+        }
+    }
+    
+    // [Touch Routes Verify] 12-13-2024
+    //
+    // Seems correct; The only thing you
+    // may want to change is funtion name.
+    //
+    @MainActor func snapshot_post(jiggleViewModel: JiggleViewModel,
+                                  jiggleDocument: JiggleDocument,
+                                  animationMode: AnimatonMode) {
+        for jiggleIndex in 0..<jiggleDocument.jiggleCount {
+            let jiggle = jiggleDocument.jiggles[jiggleIndex]
+            jiggle.snapshotAnimusAfterThenReconcileAndPerform(controller: self,
+                                                              jiggleViewModel: jiggleViewModel,
+                                                              jiggleDocument: jiggleDocument,
+                                                              animationMode: animationMode)
+        }
+    }
+    
     
     // [Touch Routes Verify] 12-7-2024
     //
     // Seems correct; I don't see any possible
     // Chance that this could screw up!!!!!!!!!
     //
-    func animusTouchesContainsTouch(_ animusTouch: Animus2Touch) -> Bool {
+    func animusTouchesContainsTouch(_ animusTouch: AnimusTouch) -> Bool {
         for animusTouchIndex in 0..<animusTouchCount {
             if animusTouches[animusTouchIndex] === animusTouch {
                 return true
@@ -29,21 +61,21 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // Chance that this could screw up!!!!!!!!!
     //
-    func addAnimusTouch(animusTouch: Animus2Touch) {
+    func addAnimusTouch(animusTouch: AnimusTouch) {
         
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             if animusTouchesContainsTouch(animusTouch) {
                 print("FATAL ERROR: We're adding the same animus touch twice...")
             }
         }
         
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             if purgatoryAnimusTouchesContainsTouch(animusTouch) {
                 print("FATAL ERROR: We're adding the same animus touch which is in purgatory...")
             }
         }
         
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             switch animusTouch.residency {
             case .unassigned:
                 break
@@ -66,7 +98,7 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // Chance that this could screw up!!!!!!!!!
     //
-    func releaseAnimusTouchesContainsTouch(_ animusTouch: Animus2Touch) -> Bool {
+    func releaseAnimusTouchesContainsTouch(_ animusTouch: AnimusTouch) -> Bool {
         for animusTouchIndex in 0..<releaseAnimusTouchCount {
             if releaseAnimusTouches[animusTouchIndex] === animusTouch {
                 return true
@@ -75,21 +107,21 @@ extension Animus2Controller {
         return false
     }
     
-    func purgatoryAnimusTouchesAdd(_ animusTouch: Animus2Touch) {
+    func purgatoryAnimusTouchesAdd(_ animusTouch: AnimusTouch) {
         
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             if animusTouchesContainsTouch(animusTouch) {
                 print("FATAL ERROR: We're adding the same purgatory touch twice...")
             }
         }
         
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             if purgatoryAnimusTouchesContainsTouch(animusTouch) {
                 print("FATAL ERROR: We're adding the same purgatory touch which is in regular touches...")
             }
         }
         
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             switch animusTouch.residency {
             case .jiggleContinuous:
                 print("FATAL ERROR: We're adding to purgatory a touch with residency of jiggleContinuous...")
@@ -112,7 +144,7 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // Chance that this could screw up!!!!!!!!!
     //
-    func purgatoryAnimusTouchesContainsTouch(_ animusTouch: Animus2Touch) -> Bool {
+    func purgatoryAnimusTouchesContainsTouch(_ animusTouch: AnimusTouch) -> Bool {
         for animusTouchIndex in 0..<purgatoryAnimusTouchCount {
             if purgatoryAnimusTouches[animusTouchIndex] === animusTouch {
                 return true
@@ -126,7 +158,7 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // problem with this one...
     //
-    func purgatoryAnimusTouchesFind(touch: UITouch) -> Animus2Touch? {
+    func purgatoryAnimusTouchesFind(touch: UITouch) -> AnimusTouch? {
         let touchObjectIdentifier = ObjectIdentifier(touch)
         return purgatoryAnimusTouchesFind(touchID: touchObjectIdentifier)
     }
@@ -136,7 +168,7 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // problem with this one...
     //
-    func purgatoryAnimusTouchesFind(touchID: ObjectIdentifier) -> Animus2Touch? {
+    func purgatoryAnimusTouchesFind(touchID: ObjectIdentifier) -> AnimusTouch? {
         for animusTouchIndex in 0..<purgatoryAnimusTouchCount {
             if purgatoryAnimusTouches[animusTouchIndex].touchID == touchID {
                 return purgatoryAnimusTouches[animusTouchIndex]
@@ -150,7 +182,7 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // TODO: We don't even need this
     //
-    func purgatoryAnimusTouchesCount(_ animusTouch: Animus2Touch) -> Int {
+    func purgatoryAnimusTouchesCount(_ animusTouch: AnimusTouch) -> Int {
         var result = 0
         for animusTouchIndex in 0..<purgatoryAnimusTouchCount {
             if animusTouch === purgatoryAnimusTouches[animusTouchIndex] {
@@ -160,23 +192,21 @@ extension Animus2Controller {
         return result
     }
     
-    // [Touch Routes Verify] 12-8-2024
+    // [Touch Routes Verify] 12-13-2024
     //
-    // Seems correct; I don't see any possible
+    // Seems correct; This has been re-evaluated.
+    // I am happy with each and every line of code.
+    // Eventually the insane checks can be removed.
     //
-    func purgatoryAnimusTouchesRemove(_ animusTouch: Animus2Touch) -> Bool {
+    func purgatoryAnimusTouchesRemove(_ animusTouch: AnimusTouch) -> Bool {
         
-        if Animus2Controller.INSANE_VERIFY {
-            
+        if AnimusController.INSANE_VERIFY {
             let touchCount = purgatoryAnimusTouchesCount(animusTouch)
-            
             if touchCount > 1 {
                 print("FATAL: We have a Purgatory touch more than once...")
             }
-            
             if touchCount <= 0 {
                 print("FATAL: We are removing a Purgatory touch that's not in the list?!?!")
-                return false
             }
         }
         
@@ -198,9 +228,61 @@ extension Animus2Controller {
             removeLoopIndex += 1
         }
         purgatoryAnimusTouchCount -= numberRemoved
-        
+        AnimusPartsFactory.shared.depositAnimusTouch(animusTouch)
         if numberRemoved > 0 {
-            Animus2PartsFactory.shared.depositAnimusTouch(animusTouch)
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    // [Touch Routes Verify] 12-13-2024
+    //
+    // Seems correct; This has been re-evaluated.
+    // I am happy with each and every line of code.
+    // Eventually the insane checks can be removed.
+    // Please note: a "grab" touch goes to purgatory.
+    //
+    @MainActor func removeAnimusTouch(jiggleViewModel: JiggleViewModel,
+                                      jiggleDocument: JiggleDocument,
+                                      animusTouch: AnimusTouch) -> Bool {
+
+        if AnimusController.INSANE_VERIFY {
+            let touchCount = animusTouchesCount(animusTouch)
+            if touchCount > 1 {
+                print("FATAL: We have a AnimusTouch more than once...")
+            }
+            
+            if touchCount <= 0 {
+                print("FATAL: We are removing a AnimusTouch that's not in the list?!?!")
+            }
+        }
+        
+        var numberRemoved = 0
+        var removeLoopIndex = 0
+        while removeLoopIndex < animusTouchCount {
+            if animusTouches[removeLoopIndex] === animusTouch {
+                break
+            } else {
+                removeLoopIndex += 1
+            }
+        }
+        while removeLoopIndex < animusTouchCount {
+            if animusTouches[removeLoopIndex] === animusTouch {
+                numberRemoved += 1
+            } else {
+                animusTouches[removeLoopIndex - numberRemoved] = animusTouches[removeLoopIndex]
+            }
+            removeLoopIndex += 1
+        }
+        animusTouchCount -= numberRemoved
+        switch animusTouch.residency {
+        case .jiggleGrab:
+            purgatoryAnimusTouchesAdd(animusTouch)
+        default:
+            AnimusPartsFactory.shared.depositAnimusTouch(animusTouch)
+        }
+        if numberRemoved > 0 {
             return true
         } else {
             return false
@@ -212,7 +294,7 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // TODO: We don't even need this
     //
-    func animusTouchesCount(_ animusTouch: Animus2Touch) -> Int {
+    func animusTouchesCount(_ animusTouch: AnimusTouch) -> Int {
         var result = 0
         for animusTouchIndex in 0..<animusTouchCount {
             if animusTouch === animusTouches[animusTouchIndex] {
@@ -252,7 +334,13 @@ extension Animus2Controller {
         return result
     }
     
-    func releaseAnimusTouchesAddUnique(_ animusTouch: Animus2Touch) {
+    // [Touch Routes Verify] 12-13-2024
+    //
+    // Seems correct; I don't see any possible improvement.
+    // From what I've seen, we don't need the unique check.
+    // However, in this situation, it could really happen.
+    //
+    func releaseAnimusTouchesAddUnique(_ animusTouch: AnimusTouch) {
         if releaseAnimusTouchesContainsTouch(animusTouch) == false {
             
             while releaseAnimusTouches.count <= releaseAnimusTouchCount {
@@ -263,16 +351,66 @@ extension Animus2Controller {
         }
     }
     
+    // [Touch Routes Verify] 12-13-2024
+    //
+    // Seems correct; I don't see any possible improvement.
+    //
+    @MainActor func killDragAll(jiggleViewModel: JiggleViewModel,
+                                jiggleDocument: JiggleDocument,
+                                animationMode: AnimatonMode) {
+        flushAll(jiggleViewModel: jiggleViewModel,
+                 jiggleDocument: jiggleDocument,
+                 animationMode: animationMode)
+    }
     
+    // [Touch Routes Verify] 12-13-2024
+    //
+    // Seems correct; I don't see any possible improvement.
+    //
+    @MainActor func handleDocumentModeDidChange(jiggleViewModel: JiggleViewModel,
+                                                jiggleDocument: JiggleDocument,
+                                                animationMode: AnimatonMode) {
+        flushAll(jiggleViewModel: jiggleViewModel,
+                 jiggleDocument: jiggleDocument,
+                 animationMode: animationMode)
+    }
     
+    // [Touch Routes Verify] 12-13-2024
+    //
+    // Seems correct; I don't see any possible improvement.
+    //
+    @MainActor func applicationWillResignActive(jiggleViewModel: JiggleViewModel,
+                                                jiggleDocument: JiggleDocument,
+                                                animationMode: AnimatonMode) {
+        flushAll(jiggleViewModel: jiggleViewModel,
+                 jiggleDocument: jiggleDocument,
+                 animationMode: animationMode)
+    }
+    
+    // [Touch Routes Verify] 12-13-2024
+    //
+    // Seems correct; I don't see any possible improvement.
+    //
+    @MainActor func handleJigglesDidChange(jiggleViewModel: JiggleViewModel,
+                                           jiggleDocument: JiggleDocument,
+                                           animationMode: AnimatonMode) {
+        snapshot_pre(jiggleViewModel: jiggleViewModel,
+                     jiggleDocument: jiggleDocument,
+                     animationMode: animationMode)
+        flushAnimusTouches_Orphaned(jiggleViewModel: jiggleViewModel,
+                                    jiggleDocument: jiggleDocument)
+        snapshot_post(jiggleViewModel: jiggleViewModel,
+                      jiggleDocument: jiggleDocument,
+                      animationMode: animationMode)
+    }
     
     // [Touch Routes Verify] 12-7-2024
     //
-    // Seems correct; I don't see any possible
+    // Seems correct; I don't see any possible improvement.
     // TODO: We can remove the "insane verify" after March
     //
-    func tempAnimusTouchesAdd(_ animusTouch: Animus2Touch) {
-        if Animus2Controller.INSANE_VERIFY {
+    func tempAnimusTouchesAdd(_ animusTouch: AnimusTouch) {
+        if AnimusController.INSANE_VERIFY {
             if tempAnimusTouchesContainsTouch(animusTouch) {
                 print("FATAL ERROR: We're adding the same temp touch twice...")
             }
@@ -291,7 +429,7 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // problem with this one...
     //
-    func tempAnimusTouchesContainsTouch(_ animusTouch: Animus2Touch) -> Bool {
+    func tempAnimusTouchesContainsTouch(_ animusTouch: AnimusTouch) -> Bool {
         for animusTouchIndex in 0..<tempAnimusTouchCount {
             if tempAnimusTouches[animusTouchIndex] === animusTouch {
                 return true
@@ -305,7 +443,7 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // problem with this one...
     //
-    func animusTouchesFind(touch: UITouch) -> Animus2Touch? {
+    func animusTouchesFind(touch: UITouch) -> AnimusTouch? {
         let touchObjectIdentifier = ObjectIdentifier(touch)
         return animusTouchesFind(touchID: touchObjectIdentifier)
     }
@@ -315,7 +453,7 @@ extension Animus2Controller {
     // Seems correct; I don't see any possible
     // problem with this one...
     //
-    func animusTouchesFind(touchID: ObjectIdentifier) -> Animus2Touch? {
+    func animusTouchesFind(touchID: ObjectIdentifier) -> AnimusTouch? {
         for animusTouchIndex in 0..<animusTouchCount {
             if animusTouches[animusTouchIndex].touchID == touchID {
                 return animusTouches[animusTouchIndex]
@@ -435,14 +573,14 @@ extension Animus2Controller {
     // 2.) *THIS*
     // 3.) snapshot_post(...)
     //
-    @MainActor func attemptLinkingTouchToJiggle_Grab(animusTouch: Animus2Touch,
+    @MainActor func attemptLinkingTouchToJiggle_Grab(animusTouch: AnimusTouch,
                                                      jiggleViewModel: JiggleViewModel,
                                                      jiggleDocument: JiggleDocument,
                                                      displayMode: DisplayMode,
                                                      isGraphEnabled: Bool,
                                                      touchTargetTouchSource: TouchTargetTouchSource,
                                                      isPrecise: Bool) -> Bool {
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             switch animusTouch.residency {
             case .unassigned:
                 break
@@ -478,7 +616,7 @@ extension Animus2Controller {
     // 2.) *THIS*
     // 3.) snapshot_post(...)
     //
-    @MainActor func attemptLinkingTouchToJiggle_Continuous(animusTouch: Animus2Touch,
+    @MainActor func attemptLinkingTouchToJiggle_Continuous(animusTouch: AnimusTouch,
                                                            jiggleViewModel: JiggleViewModel,
                                                            jiggleDocument: JiggleDocument,
                                                            displayMode: DisplayMode,
@@ -486,7 +624,7 @@ extension Animus2Controller {
                                                            touchTargetTouchSource: TouchTargetTouchSource,
                                                            isPrecise: Bool) -> Bool {
         
-        if Animus2Controller.INSANE_VERIFY {
+        if AnimusController.INSANE_VERIFY {
             switch animusTouch.residency {
             case .unassigned:
                 break

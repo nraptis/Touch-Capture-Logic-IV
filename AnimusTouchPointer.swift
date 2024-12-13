@@ -1,5 +1,5 @@
 //
-//  Animus2TouchPointer.swift
+//  AnimusTouchPointer.swift
 //  Jiggle3
 //
 //  Created by Nicky Taylor on 12/8/24.
@@ -7,13 +7,13 @@
 
 import Foundation
 
-class Animus2TouchPointer {
+class AnimusTouchPointer {
     
     //
     // These should always take longer to expire than the regular touch.
     // Otherwise, we may end up out of sync (the touch stayed existing, the pointer poofed)
     //
-    static let expireTime = (Animus2Touch.expireTime + Animus2Touch.expireTime * 0.5)
+    static let expireTime = (AnimusTouch.expireTime + AnimusTouch.expireTime * 0.5)
     
     var touchID: ObjectIdentifier
     var x = Float(0.0)
@@ -32,7 +32,7 @@ class Animus2TouchPointer {
     var captureTrackAngleFixed = Float(0.0)
     var captureTrackAngleDifference = Float(0.0)
     
-    var actionType = Animus2TouchPointerActionType.detached
+    var actionType = AnimusTouchPointerActionType.detached
     
     var isConsidered = false
     

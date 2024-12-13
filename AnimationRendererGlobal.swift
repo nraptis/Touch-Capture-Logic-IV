@@ -35,7 +35,7 @@ class AnimationRendererGlobal {
     
     unowned var jiggleEngine: JiggleEngine!
     unowned var graphics: Graphics!
-    unowned var animusController: Animus2Controller!
+    unowned var animusController: AnimusController!
     
     let centerMarkerStrokeBuffer = IndexedSpriteBuffer2D()
     let centerMarkerFillBuffer = IndexedSpriteBuffer2DColored()
